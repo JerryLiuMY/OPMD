@@ -4,5 +4,5 @@ general/
 literature/
 venv/
 images/
-src/.ipynb_checkpoints
-src/__pycache__
+.ipynb_checkpoints
+__pycache__
