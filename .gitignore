@@ -4,3 +4,5 @@ general/
 literature
 venv
 calibration/
+src/.ipynb_checkpoints
+src/__pycache__
