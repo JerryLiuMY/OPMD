@@ -1,8 +1,8 @@
 .DS_Store
 .idea/
 general/
-literature
-venv
-calibration/
+literature/
+venv/
+images/
 src/.ipynb_checkpoints
 src/__pycache__
