@@ -17,16 +17,27 @@ def init_photodiode(unit):
 
 
 def set_wavelength(wl):
-    # Setup light source
-    print("Getting spectrum and power for wavelength: %2.2f" % wl)
-    tb.wavelength = int(wl)
-    sleep(0)
+    print("Setting the wavelength of the slow source to: %2.2f" % wl)
+    if abs(wl - tb.wavelength) < 0.1:
+        tb.wavelength = int(wl)
+        sleep(1)
+
+    else:
+        tb.wavelength = int(wl)
+        sleep(10)
+
     actualwl = tb.wavelength
 
     return actualwl
 
 
 def measure_power_meter(repeat):
+    """
+    Measure the power meter intensity for "repeat" number of repeated experiments
+    :param repeat: (int) The number of repeated experiments
+    :return measured_light: (int) average intensity of the light source
+    :return ambient_light: (int) average intensity of the ambient light
+    """
     measured_light_ = []
     ambient_light_ = []
 
@@ -42,10 +53,19 @@ def measure_power_meter(repeat):
 
 
 def measure_spectrometer(exposure, repeat):
+    """
+    Measure the spectrometer central wavelength and peak intensity for "repeat" number of repeated experiments
+    :param exposure: (int) The exposure time of the spectrometer
+    :param repeat: (int) The number of repeated experiments
+    :return specwl: (list) The spectral wavelength of the spectrometer
+    :return spec: (int) The spectral intensity at the wavelengths
+    """
+
     specwl_ = []
     spec_ = []
+
     for _ in range(int(repeat)):
-        specwl, spec = tb.read_spectrum(int(exposure))
+        specwl, spec = tb.read_smooth_spectrum(int(exposure), implementation=1)
         specwl_.append(specwl)
         spec_.append(spec)
     specwl = np.mean(specwl_, axis=0)
@@ -55,6 +75,9 @@ def measure_spectrometer(exposure, repeat):
 
 
 def measure_power_meters(wls, repeat):
+    """
+    Measure the power meter intensities for "repeat" number of repeated experiments for each wavelength in wls
+    """
     actualwls = []
     measured_lights = []
     ambient_lights = []
@@ -70,6 +93,10 @@ def measure_power_meters(wls, repeat):
 
 
 def measure_spectrometers(wls, exposure, repeat):
+    """
+    Measure the spectrometer spectral wavelengths and spectral intensity for "repeat" number of repeated experiments for
+    each wavelength in wls
+    """
     actualwls = []
     specwls = []
     specs = []
@@ -85,6 +112,10 @@ def measure_spectrometers(wls, exposure, repeat):
 
 
 def measure_boths(wls, exposure, repeat):
+    """
+    Measure both the power meter intensities and spectrometer spectral wavelengths and spectral intensity for "repeated"
+    number of repeated experiments for each wavelength in wls
+    """
     actualwls = []
     measured_lights = []
     ambient_lights = []

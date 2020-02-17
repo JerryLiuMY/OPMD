@@ -3,6 +3,7 @@
 general/
 literature/
 venv/
-images/
+results/
+random/
 .ipynb_checkpoints
 __pycache__
