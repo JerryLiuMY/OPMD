@@ -3,6 +3,8 @@ import numpy as np
 from pylab import rcParams
 from pyfoxtrot.Client import Client
 from OPMD_acq.testbench_funcs import OPMD_TestBench, pm_modes
+from datetime import datetime
+from tools.utils import times2seconds
 
 cl = Client("localhost:50051")
 tb = OPMD_TestBench(cl)
@@ -81,15 +83,21 @@ def measure_power_meters(wls, repeat):
     actualwls = []
     measured_lights = []
     ambient_lights = []
+    times = []
 
     for wl in wls:
         actualwl = set_wavelength(wl)
+        time = datetime.now()
         measured_light, ambient_light = measure_power_meter(repeat)
+
         actualwls.append(actualwl)
         measured_lights.append(measured_light)
         ambient_lights.append(ambient_light)
+        times.append(time)
 
-    return actualwls, measured_lights, ambient_lights
+    seconds = times2seconds(times)
+
+    return actualwls, measured_lights, ambient_lights, seconds
 
 
 def measure_spectrometers(wls, exposure, repeat):
@@ -100,15 +108,21 @@ def measure_spectrometers(wls, exposure, repeat):
     actualwls = []
     specwls = []
     specs = []
+    times = []
 
     for wl in wls:
         actualwl = set_wavelength(wl)
+        time = datetime.now()
         specwl, spec = measure_spectrometer(exposure, repeat)
+
         actualwls.append(actualwl)
         specwls.append(specwl)
         specs.append(spec)
+        times.append(time)
 
-    return actualwls, specwls, specs
+    seconds = times2seconds(times)
+
+    return actualwls, specwls, specs, seconds
 
 
 def measure_boths(wls, exposure, repeat):
@@ -121,15 +135,21 @@ def measure_boths(wls, exposure, repeat):
     ambient_lights = []
     specwls = []
     specs = []
+    times = []
 
     for wl in wls:
         actualwl = set_wavelength(wl)
+        time = datetime.now()
         measured_light, ambient_light = measure_power_meter(repeat)
         specwl, spec = measure_spectrometer(exposure, repeat)
+
         actualwls.append(actualwl)
         measured_lights.append(measured_light)
         ambient_lights.append(ambient_light)
         specwls.append(specwl)
         specs.append(spec)
+        times.append(time)
 
-    return actualwls, measured_lights, ambient_lights, specwls, specs
+    seconds = times2seconds(times)
+
+    return actualwls, measured_lights, ambient_lights, specwls, specs, seconds

@@ -8,6 +8,11 @@ def get_now():
     return now
 
 
+def times2seconds(times):
+    seconds = [round((time-times[0]).total_seconds(), 2) for time in times]
+    return seconds
+
+
 def create_experiment_dir(base_folder):
     experiment_dirs = next(os.walk(base_folder))[1]
     if len(experiment_dirs) == 0:
