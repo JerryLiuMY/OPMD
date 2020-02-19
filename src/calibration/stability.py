@@ -8,7 +8,7 @@ import pickle as pkl
 from experiment.experiment import init_photodiode, measure_boths
 from tools.utils import get_now, create_experiment_dir
 from scipy.integrate import simps
-from experiment.plot import plot_central_wl, plot_peak_spec, plot_intensity, plot_scatter, plot_power
+from tools.plot import plot_central_wl_hist, plot_peak_spec_hist, plot_intensity_hist, plot_scatter, plot_power_hist
 
 STABILITY_FOLDER = os.path.join(CALIBRATION_FOLDER, 'power')
 
@@ -73,15 +73,15 @@ def run_stability(trials, pause, wls, exposure, repeat):
 
         # Save Figure
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(36, 12))
-        plot_central_wl(axes[0][0], central_wl_trials, trials, actualwl)
-        plot_peak_spec(axes[0][1], peak_spec_trials, trials, exposure)
-        plot_intensity(axes[1][0], intensity_trials, trials, exposure)
+        plot_central_wl_hist(axes[0][0], central_wl_trials, trials, actualwl)
+        plot_peak_spec_hist(axes[0][1], peak_spec_trials, trials, exposure)
+        plot_intensity_hist(axes[1][0], intensity_trials, trials, exposure)
         plot_scatter(axes[1][1], central_wl_trials, peak_spec_trials, intensity_trials)
         fig.savefig(os.path.join(STABILITY_FOLDER, get_now() + '.png'))
 
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(36, 12))
-        plot_power(axes[0], measured_power_trials, trials, implementation='measured')
-        plot_power(axes[1], ambient_power_trials, trials, implementation='ambient')
+        plot_power_hist(axes[0], measured_power_trials, trials, implementation='measured')
+        plot_power_hist(axes[1], ambient_power_trials, trials, implementation='ambient')
         fig.savefig(os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-' + str(wl)]) + '.png'))
 
 

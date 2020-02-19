@@ -5,39 +5,53 @@ from global_settings import CALIBRATION_FOLDER
 from datetime import datetime
 import pickle as pkl
 from experiment.experiment import init_photodiode, set_wavelength, measure_power_meter
-from tools.utils import get_now, create_experiment_dir
-from experiment.plot import plot_power
+from tools.utils import build, get_now, create_experiment_dir, times2seconds
+from tools.plot import plot_measured_power_hist, plot_ambient_power_hist, plot_power_series
+import matplotlib.gridspec as gridspec
+import time
 sns.set()
 
 POWERMETER_FOLDER = os.path.join(CALIBRATION_FOLDER, 'powermeter')
 
 
-def run_powermeter(wls, trials):
+def run_powermeter(wls, trials, pause):
     new_experiment_dir = create_experiment_dir(POWERMETER_FOLDER)
     init_photodiode(unit="W/cm2")
     for wl in wls:
         actualwl = set_wavelength(wl)
         measured_power_trials = []
         ambient_power_trials = []
+        time_trials = []
         for trial in range(trials):
             print(f'{datetime.now()} Working on trial {trial}')
             measured_light, ambient_light = measure_power_meter(repeat=1)
             measured_power_trials.append(measured_light)
             ambient_power_trials.append(ambient_light)
+            time_trials.append(datetime.now())
+            time.sleep(pause)
 
-        dictionary = {'actualwl': actualwl,
-                      'measured_power_trials': measured_power_trials,
-                      'ambient_trails': ambient_power_trials,
-                      'wl': wl,
-                      'trials': trials}
+        second_trials = times2seconds(time_trials)
+        dictionary, df = build(measured_power_trials=measured_power_trials,
+                               ambient_power_trials=ambient_power_trials,
+                               second_trials=second_trials,
+                               wl=wl,
+                               actualwl=actualwl,
+                               trials=trials,
+                               pause=pause)
 
-        with open(os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-'+str(wl)]) + '.pkl'), 'wb') as h:
+        # Plot Images
+        name = os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-' + str(wl)]))
+        with open(name + '.pkl', 'wb') as h:
             pkl.dump(dictionary, h)
+        fig = plt.figure(figsize=(20, 12))
+        gs = gridspec.GridSpec(2, 2)
+        plot_measured_power_hist(plt.subplot(gs[0, 0]), df, trials)
+        plot_ambient_power_hist(plt.subplot(gs[0, 1]), df, trials)
+        plot_power_series(plt.subplot(gs[1, :]), df)
+        plt.tight_layout()
+        fig.savefig(name + '.png')
 
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 12))
-        plot_power(axes[0], measured_power_trials, trials, implementation='measured')
-        plot_power(axes[1], ambient_power_trials, trials, implementation='ambient')
-        fig.savefig(os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-' + str(wl)]) + '.png'))
+
 
 
 if __name__ == '__main__':

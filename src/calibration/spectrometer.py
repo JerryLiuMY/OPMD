@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -7,21 +6,24 @@ from global_settings import CALIBRATION_FOLDER
 from datetime import datetime
 import pickle as pkl
 from experiment.experiment import set_wavelength, measure_spectrometer
-from tools.utils import get_now, create_experiment_dir
+from tools.utils import get_now, create_experiment_dir, times2seconds, build
 from scipy.integrate import simps
-from experiment.plot import plot_central_wl, plot_peak_spec, plot_intensity, plot_scatter
+from tools.plot import plot_central_wl_hist, plot_peak_spec_hist, plot_intensity_hist, plot_scatter, plot_wl_series
+import matplotlib.gridspec as gridspec
+import time
 sns.set()
 
 SPECTROMETER_FOLDER = os.path.join(CALIBRATION_FOLDER, 'spectrometer')
 
 
-def run_spectrometer(wls, trials, exposure):
+def run_spectrometer(wls, trials, pause, exposure):
     new_experiment_dir = create_experiment_dir(SPECTROMETER_FOLDER)
     for wl in wls:
         actualwl = set_wavelength(wl)
         central_wl_trials = []
         peak_spec_trials = []
         intensity_trials = []
+        time_trials = []
         for trial in range(trials):
             print(f'{datetime.now()} Working on trial {trial}')
             specwl, spec = measure_spectrometer(exposure, repeat=1)
@@ -33,24 +35,32 @@ def run_spectrometer(wls, trials, exposure):
             central_wl_trials.append(central_wl)
             peak_spec_trials.append(peak_spec)
             intensity_trials.append(intensity)
+            time_trials.append(datetime.now())
+            time.sleep(pause)
 
-        dictionary = {'actualwl': actualwl,
-                      'central_wl_trials': central_wl_trials,
-                      'peak_spec_trails': peak_spec_trials,
-                      'intensity_trials': intensity_trials,
-                      'wl': wl,
-                      'trials': trials,
-                      'exposure': exposure}
+        second_trials = times2seconds(time_trials)
+        dictionary, df = build(central_wl_trials=central_wl_trials,
+                               peak_spec_trials=peak_spec_trials,
+                               intensity_trials=intensity_trials,
+                               second_trials=second_trials,
+                               wl=wl,
+                               actualwl=actualwl,
+                               trials=trials,
+                               pause=pause)
 
-        with open(os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-'+str(wl)]) + '.pkl'), 'wb') as h:
+        # Plot Images
+        name = os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-'+str(wl)]))
+        with open(name + '.pkl', 'wb') as h:
             pkl.dump(dictionary, h)
-
-        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(15, 12))
-        plot_central_wl(axes[0][0], central_wl_trials, trials, actualwl)
-        plot_peak_spec(axes[0][1], peak_spec_trials, trials, exposure)
-        plot_intensity(axes[1][0], intensity_trials, trials, exposure)
-        plot_scatter(axes[1][1], central_wl_trials, peak_spec_trials, intensity_trials)
-        fig.savefig(os.path.join(new_experiment_dir, '_'.join([get_now(), 'wl-' + str(wl)]) + '.png'))
+        fig = plt.figure(figsize=(20, 12))
+        gs = gridspec.GridSpec(3, 2)
+        plot_central_wl_hist(plt.subplot(gs[0, 0]), df, trials, actualwl)
+        plot_peak_spec_hist(plt.subplot(gs[0, 1]), df, trials, exposure)
+        plot_intensity_hist(plt.subplot(gs[1, 0]), df, trials, exposure)
+        plot_scatter(plt.subplot(gs[1, 1]), df)
+        plot_wl_series(plt.subplot(gs[2, :]), df)
+        plt.tight_layout()
+        fig.savefig(os.path.join(name + '.png'))
 
 
 if __name__ == '__main__':
