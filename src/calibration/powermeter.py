@@ -52,8 +52,6 @@ def run_powermeter(wls, trials, pause):
         fig.savefig(name + '.png')
 
 
-
-
 if __name__ == '__main__':
     wls = [460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700]
     trials = 400
