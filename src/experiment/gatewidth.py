@@ -14,8 +14,8 @@ run.metaparam_keys.append("VBB")
 run.metaparam_keys.append("WIDEINT")
 cf = Config()
 
-#   ccdop: pyfoxtrot OPMD_CCDOP object (to control CCD voltages, timings etc)
-#   ccdtp: pyfoxtrot CCD object, which contains metadata about the CCD (not used much interactive)
+# ccdop: pyfoxtrot OPMD_CCDOP object (to control CCD voltages, timings etc)
+# ccdtp: pyfoxtrot CCD object, which contains metadata about the CCD (not used much interactive)
 
 
 def expt():
