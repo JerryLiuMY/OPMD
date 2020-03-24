@@ -1,5 +1,6 @@
 import numpy as np
 import seaborn as sns
+import pandas as pd
 sns.set(color_codes=True)
 
 
@@ -80,28 +81,52 @@ def plot_wl_series(ax, df):
     ax.set_title(f'Central Wavelength & Peak Intensity Time Series')
 
 
-# Section III: Plot a collection of powermeter wls for the same trial #
-def plot_(ax, actualwls, measured_powers, ambient_powers):
-    """Plot the measured_powers & ambient_powers for a collection of actualwls"""
-    ax.set_xlim(300, 900)
-    ax.set_title(f'Power meter intensity: PM Mode = SINGLESHOT_MANUAL')
-    ax.plot(actualwls, measured_powers, color='blue', label='measured_lights')
-    ax.legend(loc='upper left')
-    ax_ = ax.twinx()
-    ax_.plot(actualwls, ambient_powers, color='orange', label='ambient_lights')
-    ax_.legend(loc='upper right')
+# Build dataframe and dictionary
+def build(**kwargs):
+    dictionary = {}
+    df = pd.DataFrame()
+    if 'measured_power_trials' in kwargs:
+        measured_power_trials = np.array(kwargs['measured_power_trials'])
+        dictionary['measured_power_trials'] = measured_power_trials
+        df['Measured_Power'] = measured_power_trials
 
-    for i, actualwl in enumerate(actualwls):
-        ax.annotate(round(actualwl, 2), (actualwls[i], measured_powers[i]))
-        ax_.annotate(round(actualwl, 2), (actualwls[i], ambient_powers[i]))
+    if 'ambient_power_trials' in kwargs:
+        ambient_power_trials = np.array(kwargs['ambient_power_trials'])
+        dictionary['ambient_power_trials'] = ambient_power_trials
+        df['Ambient_Power'] = ambient_power_trials
 
+    if 'central_wl_trials' in kwargs:
+        central_wl_trials = np.array(kwargs['central_wl_trials'])
+        dictionary['central_wl_trials'] = central_wl_trials
+        df['Central_WL'] = central_wl_trials
 
-# Section IV: Plot a collection of spectrometer wls for the same trial #
-def plot__(ax, specwls, specs, exposure):
-    """Plot the spectrums for a collection of central spectral wavelengths"""
-    ax.set_xlim(300, 900)
-    ax.set_title(f'Spectrometer intensity: Exposure Time = {exposure}ms')
-    for i in range(len(specwls)):
-        ax.plot(specwls[i], specs[i])
-        j = np.argmax(specs[i])
-        ax.annotate(round(specwls[i][j], 2), (specwls[i][j], specs[i][j]))
+    if 'peak_spec_trials' in kwargs:
+        peak_spec_trials = np.array(kwargs['peak_spec_trials'])
+        dictionary['peak_spec_trials'] = peak_spec_trials
+        df['Peak_Spec'] = peak_spec_trials
+
+    if 'intensity_trials' in kwargs:
+        intensity_trials = np.array(kwargs['intensity_trials'])
+        dictionary['intensity_trials'] = intensity_trials
+        df['Intensity'] = intensity_trials
+
+    if 'second_trials' in kwargs:
+        second_trials = np.array(kwargs['second_trials'])
+        dictionary['second_trials'] = second_trials
+        df['Second'] = second_trials
+
+    # Parameters
+    if 'wl' in kwargs:
+        wl = np.array(kwargs['wl'])
+        dictionary['wl'] = wl
+    if 'actualwl' in kwargs:
+        actualwl = np.array(kwargs['actualwl'])
+        dictionary['actualwl'] = actualwl
+    if 'trials' in kwargs:
+        trials = np.array(kwargs['trials'])
+        dictionary['trials'] = trials
+    if 'pause' in kwargs:
+        pause = np.array(kwargs['pause'])
+        dictionary['pause'] = pause
+
+    return dictionary, df

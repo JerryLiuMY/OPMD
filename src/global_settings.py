@@ -1,5 +1,6 @@
 PROJECT_FOLDER = '/Users/mingyu/Desktop/OPMD_Mingyu'
 CALIBRATION_FOLDER = '/Users/mingyu/Desktop/OPMD_Mingyu/results/calibration'
+EXPERIMENT_FOLDER = '/Users/mingyu/Desktop/OPMD_Mingyu/results/experiment'
 
 
 # np.shape(actualwls) = (num_wls, )
