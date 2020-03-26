@@ -2,8 +2,9 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from global_settings import FRAME_FOLDER
+from global_settings import EXPERIMENT_FOLDER
 
+FRAME_FOLDER = os.path.join(EXPERIMENT_FOLDER, 'frames')
 hdul = fits.open(os.path.join(FRAME_FOLDER, 'PTC20-21-03-19-19-04.fits'))
 
 print(hdul[1].header[:20])

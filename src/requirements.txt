@@ -3,3 +3,5 @@ pyqtgraph
 matplotlib
 pandas
 numpy
+astropy
+peakutils
