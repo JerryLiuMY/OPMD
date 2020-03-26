@@ -1,8 +1,7 @@
 import pickle
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from tools.correction import read_smooth_spectrum
+from analysis.correction import read_smooth_spectrum
 
 with open('/Users/mingyu/Desktop/OPMD_Mingyu/random/led_spec/20200325-150502.pkl', 'rb') as handle:
     led_spec = pickle.load(handle)
