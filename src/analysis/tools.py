@@ -36,10 +36,13 @@ def load_data(hdul, C, cutoff=0.95):
 def inlier(mean_el, diffvr_el):
     z = np.polyfit(mean_el, diffvr_el, deg=2)
     p = np.poly1d(z)
-    ransac = linear_model.RANSACRegressor(residual_threshold=50, stop_probability=0.99)
+    ransac = linear_model.RANSACRegressor(residual_threshold=100, stop_probability=0.99)
     ransac.fit(mean_el.reshape(-1, 1), diffvr_el - p(mean_el))
     inlier_mask = ransac.inlier_mask_
-    mean_el, diffvr_el = mean_el[inlier_mask], diffvr_el[inlier_mask]
+    outlier_mask = np.logical_not(inlier_mask)
+
+    diffvr_el_out = p(mean_el[outlier_mask])
+    np.place(diffvr_el, outlier_mask, diffvr_el_out)
 
     return mean_el, diffvr_el
 

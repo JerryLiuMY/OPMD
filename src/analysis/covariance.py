@@ -13,16 +13,16 @@ def covariance(file_name, C, algo='RANSAC', fit=True):
     mean_el, diffvr_el, corr, gain = load_data(hdul, C)
 
     cov_el = diffvr_el
-    ij_pairs = [(i, j) for i in range(0, 6) for j in range(0, 6) if i + j != 0]
+    ij_pairs = [(i, j) for i in range(0, 8) for j in range(0, 8) if i + j != 0]
     for ij_pair in ij_pairs:
         i, j = ij_pair[0], ij_pair[1]
-        threshold = 0.0015 if (i <= 3 and j <= 3) else 0.0005
+        threshold = 0.01 if (i <= 3 and j <= 3) else 0.005
         if fit is True and algo == 'RANSAC':
             ransac = linear_model.RANSACRegressor(residual_threshold=threshold, stop_probability=0.99)
             ransac.fit(mean_el.reshape(-1, 1), corr[:, i, j])
             corr_ij = ransac.predict(mean_el.reshape(-1, 1))
         elif fit is True and algo == 'HUBER':
-            huber = linear_model.HuberRegressor(epsilon=1.35, max_iter=100, alpha=0.1)
+            huber = linear_model.HuberRegressor(epsilon=1.35, max_iter=100, alpha=0.1, fit_intercept=False)
             huber.fit(mean_el.reshape(-1, 1), corr[:, i, j])
             corr_ij = huber.predict(mean_el.reshape(-1, 1))
         else:
@@ -54,6 +54,15 @@ def covariance_fit(mean_el, cov_el, deg):
     axes[1].legend()
 
 
-def run_covariance(file_name, C, deg=2):
+def run_covariance(file_name, C):
     mean_el, cov_el = covariance(file_name, C, algo='RANSAC', fit=True)
-    covariance_fit(mean_el, cov_el, deg=deg)
+    covariance_fit(mean_el, cov_el, deg=2)
+
+
+def calculate_correlation_coeffs(dat, nx=10, ny=10):
+    out = np.zeros((nx, ny))
+    s = np.sum(dat**2)
+    for i in range(nx):
+        for j in range(ny):
+            out[i, j] = np.sum(np.roll(dat, (i, j), (0, 1)) * dat) / s
+    return out

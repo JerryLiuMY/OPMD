@@ -42,8 +42,10 @@ def PTC_fit(file_name, deg):
     lin = np.linspace(0, 60000, 5000)
     axes[0].plot(lin, lin, '--', label=f'Poisson')
     axes[0].plot(mean_el, diffvr_el, 'o', label=f'PTC')
+    axes[0].legend()
     axes[1].plot(mean_el, diffvr_el - diffvr_el_1, 'o', label=f'deg=1')
     axes[1].plot(mean_el, diffvr_el - diffvr_el_n, 'o', label=f'deg={deg}')
+    axes[1].legend()
 
 
 def run_PTC(file_name, deg=2):
