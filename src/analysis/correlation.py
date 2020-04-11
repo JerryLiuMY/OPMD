@@ -40,14 +40,15 @@ def photometry(file_name):
     axes[1].set_ylabel('Normalized Photon Difference (frac)')
 
 
-def correlation_fit(file_name, C, algo='RANSAC'):
+def correlation_fit(file_name, C, i=1, j=0, algo='RANSAC'):
     assert algo in ['RANSAC', 'HUBER']
     hdul, vbb, wideint, wwideint = load_hdul(file_name)
     mean_el, diffvr_el, corr, gain = load_data(hdul, C)
-    corr_10 = corr[:, 1, 0]
+    corr_10 = corr[:, i, j]
 
     if algo == 'RANSAC':
-        ransac = linear_model.RANSACRegressor(stop_probability=0.99)
+        threshold = 0.0015 if (i <= 3 and j <= 3) else 0.0004
+        ransac = linear_model.RANSACRegressor(residual_threshold=threshold, stop_probability=0.99)
         ransac.fit(mean_el.reshape(-1, 1), corr_10)
         inlier_mask = ransac.inlier_mask_
         outlier_mask = np.logical_not(inlier_mask)
