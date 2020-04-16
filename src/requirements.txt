@@ -7,3 +7,4 @@ astropy
 peakutils
 seaborn
 sklearn
+tqdm

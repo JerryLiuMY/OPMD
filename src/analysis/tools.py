@@ -4,7 +4,10 @@ from global_settings import EXPERIMENT_FOLDER
 import seaborn as sns
 import numpy as np
 from sklearn import linear_model
+from tqdm import tqdm_notebook
+import matplotlib.pyplot as plt
 sns.set()
+
 
 FRAME_FOLDER = os.path.join(EXPERIMENT_FOLDER, 'frames')
 
@@ -22,27 +25,36 @@ def load_hdul(file_name):
     return hdul, vbb, wideint, wwideint
 
 
-def load_data(hdul, C, cutoff=0.95):
+def load_data(hdul, C, cutoff=0.75):
     channel_data = hdul[1].data[hdul[1].data['chans'] == C]
-    mean = channel_data['md1'][:int(400*cutoff)]
-    diffvr = channel_data['diffvr'][:int(400*cutoff)]
+    mean = channel_data['mn1db'][:int(400*cutoff)] - channel_data['mn1db'][0]
+    diffvr = channel_data['diffvr'][:int(400*cutoff)] - channel_data['diffvr'][0]
     corr = channel_data['correls'].reshape(400, 10, 10)[:int(400*cutoff), :, :]
-    gain = (channel_data['mn1db'][11] - channel_data['mn1db'][1]) / (channel_data['diffvr'][11] - channel_data['diffvr'][1])
+    gain = (mean[10] - mean[0]) / (diffvr[10] - diffvr[0])
     mean_el, diffvr_el = mean * gain, diffvr * (gain ** 2)
 
     return mean_el, diffvr_el, corr, gain
 
 
-def inlier(mean_el, diffvr_el):
+def dip_remove(mean_el, diffvr_el, cutoff=1):
+    mean_el_raw, diffvr_el_raw = mean_el.copy(), diffvr_el.copy()
+    mean_el, diffvr_el = mean_el[: int(400 * cutoff)], diffvr_el[: int(400 * cutoff)]
+
+    # Polynomial & Residual Fit
     z = np.polyfit(mean_el, diffvr_el, deg=2)
     p = np.poly1d(z)
-    ransac = linear_model.RANSACRegressor(residual_threshold=100, stop_probability=0.99)
+    ransac = linear_model.RANSACRegressor(residual_threshold=30, stop_probability=0.99)
     ransac.fit(mean_el.reshape(-1, 1), diffvr_el - p(mean_el))
-    inlier_mask = ransac.inlier_mask_
-    outlier_mask = np.logical_not(inlier_mask)
+    out_mask = np.logical_not(ransac.inlier_mask_)
 
-    diffvr_el_out = p(mean_el[outlier_mask])
-    np.place(diffvr_el, outlier_mask, diffvr_el_out)
+    # Interpolation
+    int_mask = np.logical_and(mean_el >= 15000, mean_el <= 25000)
+    out_mask = np.logical_and(out_mask, int_mask)
+    diffvr_el_out = p(mean_el[out_mask])
+    np.place(diffvr_el, out_mask, diffvr_el_out)
+
+    mean_el = np.concatenate([mean_el, mean_el_raw[int(400 * cutoff):]])
+    diffvr_el = np.concatenate([diffvr_el, diffvr_el_raw[int(400 * cutoff):]])
 
     return mean_el, diffvr_el
 
@@ -54,3 +66,28 @@ def poly_fit(mean_el, diffvr_el, deg):
     diffvr_el_n = np.poly1d(z_n)(mean_el)
 
     return diffvr_el_1, diffvr_el_n
+
+
+def simulation(trials, mean=10**2):
+    loss = []
+    for _ in tqdm_notebook(np.arange(trials)):
+        data = np.random.poisson(mean, int(4096 * 4096 / 16))
+        mean, std = np.mean(data), np.std(data)
+
+        inlier_mask = (abs(data - mean) < 3 * std)
+        data_in = data[inlier_mask]
+        mean_in, std_in = np.mean(data_in), np.std(data_in)
+
+        loss.append((std - std_in) / std)
+
+    return loss
+
+
+def run_simulation():
+    means = [10, 50, 100, 300, 500, 1000, 5000, 10000]
+    average_losses = []
+    for mean in means:
+        loss = simulation(100, mean)
+        average_losses.append(np.mean(loss))
+
+    plt.plot(means, average_losses)

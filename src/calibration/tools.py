@@ -1,7 +1,19 @@
 import numpy as np
 import seaborn as sns
 import pandas as pd
-sns.set(color_codes=True)
+import matplotlib.pyplot as plt
+
+SMALL_SIZE = 8
+MEDIUM_SIZE = 10
+BIGGER_SIZE = 12
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 
 # Section I: Plot a collection of powermeter trials for the same wl #
@@ -12,7 +24,7 @@ def plot_measured_power_hist(ax, df, trials):
     ax.set_xlabel('Measured Intensity')
     ax.set_ylabel('Frequency')
     ax.legend(loc='upper right')
-    ax.set_title(f'Measured intensities histogram: PM Mode = SINGLESHOT_MANUAL')
+    # ax.set_title(f'Measured intensities histogram: PM Mode = SINGLESHOT_MANUAL')
 
 
 def plot_ambient_power_hist(ax, df, trials):
@@ -22,7 +34,7 @@ def plot_ambient_power_hist(ax, df, trials):
     ax.set_xlabel('Ambient Intensity')
     ax.set_ylabel('Frequency')
     ax.legend(loc='upper right')
-    ax.set_title(f'Ambient intensities histogram: PM Mode = SINGLESHOT_MANUAL')
+    # ax.set_title(f'Ambient intensities histogram: PM Mode = SINGLESHOT_MANUAL')
 
 
 def plot_power_series(ax, df):
@@ -32,7 +44,7 @@ def plot_power_series(ax, df):
     ax_ = ax.twinx()
     sns.lineplot(x='Second', y='Ambient_Power', data=df, color=sns.color_palette()[1], label='Ambient_Power', ax=ax_)
     ax_.legend(loc='upper right')
-    ax.set_title(f'Measured & Ambient Power Time Series')
+    # ax.set_title(f'Measured & Ambient Power Time Series')
 
 
 # Section II: Plot a collection of spectrometer trials for the same wl #
@@ -40,10 +52,10 @@ def plot_central_wl_hist(ax, df, trials, actualwl):
     """Plot the histogram of central wavelength for {trials} number of trials"""
     central_wl_trials = df['Central_WL']
     sns.distplot(central_wl_trials, bins=15, label=f'num_trials={trials}', ax=ax)
-    ax.set_xlabel('Central Wavelength (nm)')
+    ax.set_xlabel('Peak Wavelength (nm)')
     ax.set_ylabel('Frequency')
     ax.legend(loc='upper right')
-    ax.set_title(f'Central wavelengths histogram: Actual Wavelength = {round(actualwl, 2)}nm')
+    # ax.set_title(f'Central wavelengths histogram: Actual Wavelength = {round(actualwl, 2)}nm')
 
 
 def plot_peak_spec_hist(ax, df, trials, exposure):
@@ -53,7 +65,7 @@ def plot_peak_spec_hist(ax, df, trials, exposure):
     ax.set_xlabel('Peak Intensity (Counts)')
     ax.set_ylabel('Frequency')
     ax.legend(loc='upper right')
-    ax.set_title(f'Peak intensities histogram: Exposure Time = {exposure}ms')
+    # ax.set_title(f'Peak intensities histogram: Exposure Time = {exposure}ms')
 
 
 def plot_intensity_hist(ax, df, trials, exposure):
@@ -63,13 +75,15 @@ def plot_intensity_hist(ax, df, trials, exposure):
     ax.set_xlabel('Total Intensity (Counts)')
     ax.set_ylabel('Frequency')
     ax.legend(loc='upper right')
-    ax.set_title(f'Total intensities histogram: Exposure Time = {exposure}ms')
+    # ax.set_title(f'Total intensities histogram: Exposure Time = {exposure}ms')
 
 
 def plot_scatter(ax, df):
     """Plot the scatter plot of peak intensity vs. total intensity for {trials} number of trials"""
     sns.scatterplot(x='Peak_Spec', y='Intensity', hue='Central_WL', size='Central_WL', data=df, ax=ax)
-    ax.set_title(f'Peak Intensity vs. Total Intensity Histogram')
+    ax.set_xlabel(f'Peak Intensity (Counts)')
+    ax.set_ylabel(f'Total Intensity (Counts)')
+    # ax.set_title(f'Peak Intensity vs. Total Intensity')
 
 
 def plot_wl_series(ax, df):
@@ -78,7 +92,7 @@ def plot_wl_series(ax, df):
     ax_ = ax.twinx()
     sns.lineplot(x='Second', y='Peak_Spec', data=df, color=sns.color_palette()[1], label='Peak_Spec', ax=ax_)
     ax_.legend(loc='upper right')
-    ax.set_title(f'Central Wavelength & Peak Intensity Time Series')
+    # ax.set_title(f'Central Wavelength & Peak Intensity Time Series')
 
 
 # Build dataframe and dictionary

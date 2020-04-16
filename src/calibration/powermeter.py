@@ -43,11 +43,11 @@ def powermeter_test(wl, trials, pause, dir, repeat=1):
     with open(name + '.pkl', 'wb') as h:
         pkl.dump(dictionary, h)
 
-    fig = plt.figure(figsize=(20, 12))
-    gs = gridspec.GridSpec(2, 2)
-    plot_measured_power_hist(plt.subplot(gs[0, 0]), df, trials)
-    plot_ambient_power_hist(plt.subplot(gs[0, 1]), df, trials)
-    plot_power_series(plt.subplot(gs[1, :]), df)
+    fig = plt.figure(figsize=(20, 8))
+    gs = gridspec.GridSpec(5, 2)
+    plot_measured_power_hist(plt.subplot(gs[0:3, 0]), df, trials)
+    plot_ambient_power_hist(plt.subplot(gs[0:3, 1]), df, trials)
+    plot_power_series(plt.subplot(gs[3:, :]), df)
     plt.tight_layout()
     fig.savefig(name + '.png')
 

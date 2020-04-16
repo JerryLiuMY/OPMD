@@ -1,6 +1,5 @@
 import scipy.integrate as integrate
 import numpy as np
-import matplotlib.pyplot as plt
 
 R = 60000
 
