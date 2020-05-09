@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 from sklearn import linear_model
 from analysis.tools import load_hdul, load_data
-from analysis.tools import make_bars
+from analysis.plots import make_bars
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.linear_model import LinearRegression
 sns.set()
