@@ -3,8 +3,6 @@ import numpy as np
 from pylab import rcParams
 from pyfoxtrot.Client import Client
 from OPMD_acq.testbench_funcs import OPMD_TestBench, pm_modes
-from datetime import datetime
-from tools.utils import times2seconds
 
 cl = Client("localhost:50051")
 tb = OPMD_TestBench(cl)

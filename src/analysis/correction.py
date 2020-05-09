@@ -55,22 +55,6 @@ def smooth_spectrum(specwl_raw, base_filter_spec, out=True):
     return specwl, spec
 
 
-def kernel(specwl, wl, N):
-    inter = (np.sin(N*np.pi*specwl/wl)/(N*np.sin(np.pi*specwl/wl))+1e-4)**2
-    return inter
-
-
-def convolution(wl, I, specwl, N):
-    specwl_, spec_ = np.array(specwl), np.array([sum(kernel(foo, wl, N) * I) for foo in specwl])
-    return specwl_, spec_
-
-
-def deconvolution(wl, specwl, spec, N):
-    M = np.array([kernel(foo, wl, N) for foo in specwl])
-    wl_, I_ = np.array(wl), np.linalg.lstsq(M, spec)[0]
-    return wl_, I_
-
-
 def load_real(REAL):
     wl_raw, I_raw = np.array(REAL['wl']), np.array(REAL['I'])
     wl = np.linspace(min(wl_raw), max(wl_raw), 50)
@@ -88,6 +72,21 @@ def load_measure(SPEC):
 
     return specwl, spec
 
+
+def kernel(specwl, wl, N):
+    inter = (np.sin(N*np.pi*specwl/wl)/(N*np.sin(np.pi*specwl/wl))+1e-4)**2
+    return inter
+
+
+def convolution(wl, I, specwl, N):
+    specwl_, spec_ = np.array(specwl), np.array([sum(kernel(foo, wl, N) * I) for foo in specwl])
+    return specwl_, spec_
+
+
+def deconvolution(wl, specwl, spec, N):
+    M = np.array([kernel(foo, wl, N) for foo in specwl])
+    wl_, I_ = np.array(wl), np.linalg.lstsq(M, spec)[0]
+    return wl_, I_
 
 def diode_bias(wl_, I_, r):
     interp = interp1d(wl_, I_, kind='quadratic')

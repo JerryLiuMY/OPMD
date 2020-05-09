@@ -6,9 +6,9 @@ from global_settings import CALIBRATION_FOLDER
 from datetime import datetime
 import pickle as pkl
 from bench.bench import init_photodiode, set_wavelength, measure_power_meter
-from tools.utils import get_now, create_experiment_dir, times2seconds
-from calibration.tools import build
-from calibration.tools import plot_measured_power_hist, plot_ambient_power_hist, plot_power_series
+from calibration.tools import get_now, create_experiment_dir, times2seconds
+from calibration.plots import build
+from calibration.plots import plot_measured_power_hist, plot_ambient_power_hist, plot_power_series
 import time
 sns.set()
 

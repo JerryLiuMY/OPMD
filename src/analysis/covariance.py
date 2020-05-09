@@ -15,24 +15,24 @@ def covariance(file_name, algo='RANSAC', fit=True):
     data_len = len(load_data(hdul, 5)[0])
     mean_el_ave, cov_el_ave = np.zeros(np.shape(data_len)), np.zeros(np.shape(data_len))
 
-    ij_pairs = [(i, j) for i in range(0, 8) for j in range(0, 8) if i + j != 0]
+    ij_pairs = [(i, j) for i in range(0, 10) for j in range(0, 10) if i + j != 0]
     for C in CHANNEL_5:
         mean_el, diffvr_el, corr, gain = load_data(hdul, C)
         mean_el, cov_el = dip_remove(mean_el, diffvr_el, cutoff=0.8)
         for ij_pair in ij_pairs:
             i, j = ij_pair[0], ij_pair[1]
             threshold = 0.01 if (i <= 3 and j <= 3) else 0.005
-            if fit is True and algo == 'RANSAC':
+            if (fit is True) and (algo == 'RANSAC'):
                 ransac = linear_model.RANSACRegressor(residual_threshold=threshold, stop_probability=0.99)
                 ransac.fit(mean_el.reshape(-1, 1), corr[:, i, j])
                 corr_ij = ransac.predict(mean_el.reshape(-1, 1))
-            elif fit is True and algo == 'HUBER':
+            elif (fit is True) and (algo == 'HUBER'):
                 huber = linear_model.HuberRegressor(epsilon=1.35, max_iter=100, alpha=0.1, fit_intercept=False)
                 huber.fit(mean_el.reshape(-1, 1), corr[:, i, j])
                 corr_ij = huber.predict(mean_el.reshape(-1, 1))
             else:
                 corr_ij = corr[:, i, j]
-            cov_el = cov_el + corr_ij * mean_el
+            cov_el = cov_el + corr_ij * mean_el * 4
 
         mean_el_ave, cov_el_ave = mean_el_ave + mean_el, cov_el_ave + cov_el
         plt.plot(mean_el, cov_el, 'o', label=f'Channel {str(C)}')

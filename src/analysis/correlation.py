@@ -3,23 +3,13 @@ import numpy as np
 import seaborn as sns
 from sklearn import linear_model
 from analysis.tools import load_hdul, load_data
+from analysis.tools import make_bars
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.linear_model import LinearRegression
 sns.set()
 
 
-def correlation(file_name, C):
-    hdul, vbb, wideint, wwideint = load_hdul(file_name)
-    plt.figure(figsize=(8, 6))
-    mean_el, diffvr_el, corr, gain = load_data(hdul, C)
-    corr_10, corr_20 = corr[:, 1, 0], corr[:, 2, 0]
-    plt.plot(mean_el, corr_10, 'o', label=f'Channel {str(C)}, $R_10$')
-    plt.plot(mean_el, corr_20, 'x', label=f'Channel {str(C)}, $R_20$')
-
-    plt.legend(loc='upper left')
-    plt.xlabel('Mean Pixel Count (el)')
-    plt.ylabel('Correlation (frac)')
-
-
-def correlation_fit(file_name, C, i=1, j=0, algo='RANSAC'):
+def correlation(file_name, C, i, j, ax, algo='RANSAC'):
     assert algo in ['RANSAC', 'HUBER']
     hdul, vbb, wideint, wwideint = load_hdul(file_name)
     mean_el, diffvr_el, corr, gain = load_data(hdul, C)
@@ -31,27 +21,42 @@ def correlation_fit(file_name, C, i=1, j=0, algo='RANSAC'):
         ransac.fit(mean_el.reshape(-1, 1), corr_ij)
         inlier_mask = ransac.inlier_mask_
         outlier_mask = np.logical_not(inlier_mask)
+        prediction = ransac.predict(mean_el.reshape(-1, 1))
 
     else:
         huber = linear_model.HuberRegressor(epsilon=1.35, max_iter=100, alpha=0.0001, fit_intercept=False)
         huber.fit(mean_el.reshape(-1, 1), corr_ij)
         outlier_mask = huber.outliers_
         inlier_mask = np.logical_not(outlier_mask)
+        prediction = huber.predict(mean_el.reshape(-1, 1))
 
-    fig, axes = plt.subplots(1, 2, figsize=(24, 8))
-    axes[0].plot(mean_el[inlier_mask], corr_ij[inlier_mask], 'o')
-    axes[0].plot(mean_el[inlier_mask], corr_ij[inlier_mask], 'x', label='Inlier')
-    axes[0].plot(mean_el[outlier_mask], corr_ij[outlier_mask], 'x', label='Outlier')
-    axes[0].set_xlabel('Mean Pixel Count (el); Total Points = 400')
-    axes[0].set_ylabel('Correlation (frac)')
-    axes[0].legend(loc='upper left')
-
-    axes[1].plot(mean_el[inlier_mask], corr_ij[inlier_mask], 'o', label='Inlier')
-    axes[1].set_xlabel(f'Mean Pixel Count (el); Remaining Points = {np.shape(mean_el[inlier_mask])[0]}')
-    axes[1].set_ylabel('Correlation (frac)')
-    axes[1].legend(loc='upper left')
+    ax.plot(mean_el[inlier_mask][2:], corr_ij[inlier_mask][2:], 'o', label=f'Channel {str(C)}, $R_{{{str(i)+str(j)}}}$')
+    # ax.plot(mean_el[outlier_mask], corr_ij[outlier_mask], 'x', label='Outlier')
+    # ax.plot(mean_el, prediction, '-', linewidth=4)
+    ax.set_xlabel('Mean Pixel Count (el); Total Points = 400')
+    ax.set_ylabel('Correlation (frac)')
+    ax.legend(loc='upper left')
 
     return inlier_mask
+
+
+def correlation_map(file_name, C, limit, ax):
+    hdul, vbb, wideint, wwideint = load_hdul(file_name)
+    mean_el, diffvr_el, corr, gain = load_data(hdul, C)
+    X, Y = np.meshgrid(np.arange(limit), np.arange(limit))
+
+    Z = np.zeros([limit, limit])
+    ij_pairs = [(i, j) for i in np.arange(limit) for j in np.arange(limit) if i + j != 0]
+    for ij_pair in ij_pairs:
+        i, j = ij_pair[0], ij_pair[1]
+        reg = LinearRegression(fit_intercept=False).fit(np.linspace(0, 1, np.shape(corr)[0]).reshape(-1, 1), corr[:, i, j])
+        Z[i, j] = reg.coef_[0]
+
+    ax.view_init(ax.elev+15, ax.azim + 102)
+    ax.set_xlabel('Parallel direction (plx)')
+    ax.set_ylabel('Serial direction (plx)')
+    ax.set_zlabel('Coefficient (frac)')
+    make_bars(ax, X, Y, Z, width=0.23)
 
 
 def photometry(file_name, C, inlier_mask):
@@ -79,6 +84,7 @@ def photometry(file_name, C, inlier_mask):
 
 
 def run_correlation(file_name, C):
-    correlation(file_name, C)
-    inlier_mask = correlation_fit(file_name, C, i=1, j=0, algo='RANSAC')
-    photometry(file_name, C, inlier_mask)
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    correlation(file_name, C, i=0, j=1, ax=ax)
+    correlation(file_name, C, i=1, j=0, ax=ax)
+    # photometry(file_name, C, inlier_mask)

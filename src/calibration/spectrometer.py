@@ -6,10 +6,10 @@ import pickle as pkl
 from global_settings import CALIBRATION_FOLDER
 from datetime import datetime
 from bench.bench import set_wavelength, measure_spectrometer
-from calibration.tools import build
-from tools.utils import get_now, create_experiment_dir, times2seconds
+from calibration.plots import build
+from calibration.tools import get_now, create_experiment_dir, times2seconds
 from scipy.integrate import simps
-from calibration.tools import plot_central_wl_hist, plot_peak_spec_hist, plot_intensity_hist, plot_scatter, plot_wl_series
+from calibration.plots import plot_central_wl_hist, plot_peak_spec_hist, plot_intensity_hist, plot_scatter, plot_wl_series
 import matplotlib.gridspec as gridspec
 import time
 sns.set()
