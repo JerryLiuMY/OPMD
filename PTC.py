@@ -15,7 +15,7 @@ from OPMD_eotest.overscan import oxford_serial_overscan_edges_removed, remove_se
 import json
 import numpy as np
 
-from OPMD_eotest.analysis.elaborate_masking import guyonnet_mask
+from OPMD_eotest.analysis.elaborate_masking import guyonnet_mask, guyonnet_mask2
 
 from datetime import datetime
 
@@ -75,7 +75,7 @@ class PTC(DataReduction):
     VARIABLES = ["exps","chans","oscanmd1","oscanmd2","oscanmn1","oscanmn2",
                  "oscanvr1","oscanvr2","oscandvr","mn1","mn2","mn1db","mn2db",
                  "md1","md2","md1db","md2db","vr1","vr2","vr1db","vr2db",
-                 "diffmd","diffmn","diffvr","correls","poscanmd1","poscanmd2","poscanvr1","poscanvr2","poscandvr",
+                 "diffmd","diffmn","diffvr","correls","correls_real","poscanmd1","poscanmd2","poscanvr1","poscanvr2","poscandvr",
                  "photons1", "photons2","temp1","temp2","filename1","filename2"]
 
     PARAMETERS = {"TRIM" : int}
@@ -229,7 +229,7 @@ class PTC(DataReduction):
             self.vr2db.append(np.var(imdata_mask2 - biasdat))
 
             diffim = imdata_mask1 - imdata_mask2
-            diffim_mask = guyonnet_mask(diffim)
+            diffim_mask, imdata_mask1 = guyonnet_mask2(diffim, imdata_mask1)
             diffmd = np.median(diffim_mask)
             self.diffmd.append(diffmd)
             self.diffmn.append(np.mean(diffim_mask))
@@ -240,7 +240,8 @@ class PTC(DataReduction):
 #            diffim -= diffmd
 #            diffim[mask] = 0.0
 
-            self.correls.append(calculate_correlation_coeffs_new(imdata_mask1, diffim_mask,10,10).ravel())
+            self.correls.append(calculate_correlation_coeffs(diffim_mask, 10, 10).ravel())
+            self.correls_real.append(calculate_correlation_coeffs_new(imdata_mask1, diffim_mask,10,10).ravel())
 
 
 #%%
@@ -294,7 +295,7 @@ def calculate_correlation_coeffs(dat,nx=10,ny=10):
 
 
 def calculate_correlation_coeffs_fast(dat,nx=10,ny=10):
-    out = np.zeros((nx,ny))
+    out=  np.zeros((nx,ny))
     s = np.sum(dat**2)
     for i in range(nx):
         for j in range(ny):

@@ -22,29 +22,34 @@ def raw_PTC(file_name, ax):
     ax.set_ylabel('Variance ($kADU^2$)')
 
 
-def PTC(file_name, ax1, ax2, cutoff=0.8):
+def PTC(file_name, ax1, ax2, cutoff=1):
     hdul, vbb, wideint, wwideint = load_hdul(file_name)
+    diffvr_els = 0
     for C in CHANNEL_5:
         mean_el, diffvr_el, corr, gain = load_data(hdul, C, cutoff=cutoff)
         mean_el, diffvr_el = mean_el/1000, diffvr_el/1000
         ax1.plot(mean_el, diffvr_el, 'o', label=f'Channel {str(C)}')
         ax2.plot(mean_el, diffvr_el - mean_el, 'o', label=f'Channel {str(C)}')
 
-    lin = np.linspace(0, 70000 * cutoff / 1000, 5000)
+        diffvr_els += diffvr_el/4
+
+    lin = np.linspace(0, 70 * cutoff, 5000)
     ax1.plot(lin, lin, '--')
     ax1.legend(loc='upper left')
     ax1.set_xlabel('Mean (kel)')
     ax1.set_ylabel('Variance ($kel^2$)')
-    ax1.annotate('Possion Noise: $\sigma_{S}^{2}=\mu$', xy=(60000/1000, 60000/1000), xytext=(40000/1000, 69000/1000),
+    ax1.annotate('Possion Noise: $\sigma_{S}^{2}=\mu$', xy=(60, 60), xytext=(40, 69),
                  arrowprops=dict(width=2, headlength=4, facecolor='black'), fontsize=14)
-    ax1.set_xlim(-2000 / 1000, 72000 * cutoff / 1000)
+    ax1.set_xlim(-2, 72 * cutoff)
 
-    lin = np.linspace(0, 70000 * cutoff / 1000, 5000)
+    lin = np.linspace(0, 70 * cutoff, 5000)
     ax2.plot(lin, np.zeros(5000), '--')
     ax2.legend(loc='lower left')
     ax2.set_xlabel('Mean (kel)')
     ax2.set_ylabel('Variance ($kel^2$)')
-    ax2.set_xlim(-2000/1000, 72000 * cutoff / 1000)
+    ax2.set_xlim(-2, 72 * cutoff)
+
+    return diffvr_els
 
 
 def PTC_fit(file_name, deg, ax3):
@@ -54,13 +59,12 @@ def PTC_fit(file_name, deg, ax3):
 
     for idx, C in enumerate(CHANNEL_5):
         mean_el, diffvr_el, corr, gain = load_data(hdul, C)
-        mean_el_ave, diffvr_el_ave = mean_el_ave + mean_el, diffvr_el_ave + diffvr_el
-    mean_el_ave, diffvr_el_ave = mean_el_ave/5, diffvr_el_ave/5
+        mean_el, diffvr_el = mean_el/1000, diffvr_el/1000
+        mean_el_ave, diffvr_el_ave = mean_el_ave + mean_el/4, diffvr_el_ave + diffvr_el/4
     diffvr_el_1, diffvr_el_n = poly_fit(mean_el_ave, diffvr_el_ave, deg)
 
-    mean_el_ave = mean_el_ave / 1000
-    ax3.plot(mean_el_ave, (diffvr_el_ave - diffvr_el_1)/1000, 'x', label=f'deg=1')
-    ax3.plot(mean_el_ave, (diffvr_el_ave - diffvr_el_n)/1000, 'x', label=f'deg={deg}')
+    ax3.plot(mean_el_ave, diffvr_el_ave - diffvr_el_1, 'x', label=f'deg=1')
+    ax3.plot(mean_el_ave, diffvr_el_ave - diffvr_el_n, 'x', label=f'deg={deg}')
     ax3.set_xlabel('Mean (kel)')
     ax3.set_ylabel('Residual ($kel^2$)')
     ax3.legend()

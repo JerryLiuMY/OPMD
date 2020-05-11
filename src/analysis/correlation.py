@@ -6,38 +6,36 @@ from analysis.tools import load_hdul, load_data
 from analysis.plots import make_bars
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.linear_model import LinearRegression
+import pandas as pd
 sns.set()
 
 
-def correlation(file_name, C, i, j, ax, algo='RANSAC'):
-    assert algo in ['RANSAC', 'HUBER']
+def correlation(file_name, C, i, j, ax):
     hdul, vbb, wideint, wwideint = load_hdul(file_name)
     mean_el, diffvr_el, corr, gain = load_data(hdul, C)
+    mean_el = mean_el / 1000
     corr_ij = corr[:, i, j]
 
-    if algo == 'RANSAC':
-        threshold = 0.01 if (i <= 3 and j <= 3) else 0.005
-        ransac = linear_model.RANSACRegressor(residual_threshold=threshold, stop_probability=0.99)
-        ransac.fit(mean_el.reshape(-1, 1), corr_ij)
-        inlier_mask = ransac.inlier_mask_
-        outlier_mask = np.logical_not(inlier_mask)
-        prediction = ransac.predict(mean_el.reshape(-1, 1))
+    # if i == 0 and j == 1:
+    #     corr_ij -= 0.0008
 
-    else:
-        huber = linear_model.HuberRegressor(epsilon=1.35, max_iter=100, alpha=0.0001, fit_intercept=False)
-        huber.fit(mean_el.reshape(-1, 1), corr_ij)
-        outlier_mask = huber.outliers_
-        inlier_mask = np.logical_not(outlier_mask)
-        prediction = huber.predict(mean_el.reshape(-1, 1))
-
-    ax.plot(mean_el[inlier_mask][2:], corr_ij[inlier_mask][2:], 'o', label=f'Channel {str(C)}, $R_{{{str(i)+str(j)}}}$')
+    reg = LinearRegression(fit_intercept=True).fit((mean_el).reshape(-1, 1), corr_ij)
+    prediction = reg.predict((mean_el).reshape(-1, 1))
+    # ransac = linear_model.RANSACRegressor(residual_threshold=0.01, stop_probability=0.99)
+    # ransac.fit(mean_el.reshape(-1, 1), corr_ij)
+    # inlier_mask = ransac.inlier_mask_
+    # prediction = ransac.predict(mean_el.reshape(-1, 1))
+    # outlier_mask = np.logical_not(inlier_mask)
     # ax.plot(mean_el[outlier_mask], corr_ij[outlier_mask], 'x', label='Outlier')
-    # ax.plot(mean_el, prediction, '-', linewidth=4)
-    ax.set_xlabel('Mean Pixel Count (el); Total Points = 400')
+
+    p = ax.scatter(mean_el[5:], corr_ij[5:], edgecolors='k', label=f'Channel average, $R_{{{str(i)+str(j)}}}$')
+    ax.plot(mean_el, prediction, '-', color=p.get_facecolor()[0], linewidth=6)
+    ax.set_xlabel('Mean (kel)')
     ax.set_ylabel('Correlation (frac)')
     ax.legend(loc='upper left')
+    ax.set_ylim(-0.002, 0.011)
 
-    return inlier_mask
+    # return inlier_mask
 
 
 def correlation_map(file_name, C, limit, ax):
@@ -49,12 +47,12 @@ def correlation_map(file_name, C, limit, ax):
     ij_pairs = [(i, j) for i in np.arange(limit) for j in np.arange(limit) if i + j != 0]
     for ij_pair in ij_pairs:
         i, j = ij_pair[0], ij_pair[1]
-        reg = LinearRegression(fit_intercept=False).fit(np.linspace(0, 1, np.shape(corr)[0]).reshape(-1, 1), corr[:, i, j])
+        reg = LinearRegression(fit_intercept=True).fit(np.linspace(0, 1, np.shape(corr)[0]).reshape(-1, 1), corr[:, i, j])
         Z[i, j] = reg.coef_[0]
 
     ax.view_init(ax.elev+15, ax.azim + 102)
-    ax.set_xlabel('Parallel direction (plx)')
-    ax.set_ylabel('Serial direction (plx)')
+    ax.set_xlabel('Serial direction (plx)')
+    ax.set_ylabel('Parallel direction (plx)')
     ax.set_zlabel('Coefficient (frac)')
     make_bars(ax, X, Y, Z, width=0.23)
 

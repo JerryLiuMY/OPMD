@@ -29,8 +29,8 @@ def load_data(hdul, C, cutoff=1):
     channel_data = hdul[1].data[hdul[1].data['chans'] == C]
     mean = channel_data['mn1db'] - channel_data['mn1db'][0]
     diffvr = channel_data['diffvr'] - channel_data['diffvr'][0]
-    mean, diffvr = dip_remove(mean, diffvr)
 
+    mean, diffvr = dip_remove(mean, diffvr)
     alpha, gain = gain_fit(mean, diffvr)
     # old_gain = (mean[10] - mean[0]) / (diffvr[10] - diffvr[0])
 
