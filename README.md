@@ -32,3 +32,10 @@ The CCD is illuminated with the same LED source peaked at `556nm` described prev
 
 ![alt text](./__resources__/PTC.jpg?raw=true "Title")
 **Figure 3:** *Top Left:* Scaled PTC of four operating channels of CCD E2V-250 in the physical unit of electron charge. Departure from the expected Poisson photon variance `$\sigma_{S}^{2}=\mu$` is observed. *Top Right:* Residuals of the scaled PTCs. They have identical magnitude and grow quadratically with the mean flux. *Bottom:* Residuals of linear and quadratic fit to the four-channel-average PTC.
+
+## Correlation
+Spatial correlation between pixels is detected up to a distance of four pixels within the sensitivity limit of the CCD. From the correlation map at `60kel` level , it is observed that correlation is the largest between the nearest neighbours and gradually decays as separation increases. 
+
+![alt text](./__resources__/correlation_map.jpg?raw=true "Title")
+
+**Figure 4:** Flat-field correlation map at `60kel` along the parallel and serial direction. The correlation decreases as pixels get further apart. An anisotropy between the coefficients `$R_{01}$` and `$R_{10}$` is observed. The anisotropy tends to vanish for separation larger than `1 pixel`.
