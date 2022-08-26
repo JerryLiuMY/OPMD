@@ -10,3 +10,25 @@ This investigation is carried out at the Oxford Physics Microstructure Detector 
   * The correlation coefficients are found to decay rapidly with spatial separation.
 * Finally, an electrostatic model that simulates the interaction between the Coulomb field induced by charges stored in CCD pixels and the drift field is presented to explain the observed statistical properties.
 
+## Tests and Calibrations
+### Intensity Stability Test
+500 power readings are taken with the photodiode over a duration of `4.17 hours` with `30s` intervals between consecutive measurements, in both the integrating sphere and the environment. The Pearson correlation coefficient is very low at `r=-0.046`, suggesting no evidence of stray light leakage into the optical system. 
+
+![alt text](./__resources__/intensity.jpg?raw=true "Title")
+**Figure 1:** Measured power of the LED source and the environment in 500 repeated trials over a duration of `4.17 hours`. *Top Left:* Histogram of LED power output measured inside the integrating sphere; *Top Right:* Histogram of ambient light power measured in the environment; *Bottom:* Time-series of the LED and ambient power
+
+
+### Intensity Stability Test
+Raw spectra measured by the spectrometer need to be cleaned and calibrated before actual spectral contents can be obtained. 
+- The first step is to remove the bias offset introduced by the analogue-to-digital converter in the downstream circuitry. 
+- The second step is to remove outliers caused by bad pixels on the digital sensor. 
+- The third step is to interpolate the values at the removed points using a second-order spline interpolation algorithm in Scipy `(Scipy.interpolate.interp1d)`.
+
+![alt text](./__resources__/smooth.jpg?raw=true "Title")
+**Figure 2:** The spectra at 12 wavelengths of the Quartz Tungsten Halogen (QTH) lamp. *Top:* Raw spectrum; *Bottom:* Smoothed spectrum
+
+## Flat-Field Experiments
+The CCD is illuminated with the same LED source peaked at `556nm` described previously. The operating temperature of the CCD is fixed at `-95 celsius` throughout the experiments. Flat-field images are captured at two backside substrate voltage `BSS=0V` and `-60V` and two collection gate widths `w=3μm` (one gate open) and `w=5μm` (two gates open) respectively. For each BSS and gate width, 400 pairs of flat-field images are taken from zero illumination up to the full well (by gradually increasing integration time from `0s` to `5s`).
+
+![alt text](./__resources__/PTC.jpg?raw=true "Title")
+**Figure 3:** *Top Left:* Scaled PTC of four operating channels of CCD E2V-250 in the physical unit of electron charge. Departure from the expected Poisson photon variance `$\sigma_{S}^{2}=\mu$` is observed. *Top Right:* Residuals of the scaled PTCs. They have identical magnitude and grow quadratically with the mean flux. *Bottom:* Residuals of linear and quadratic fit to the four-channel-average PTC.
