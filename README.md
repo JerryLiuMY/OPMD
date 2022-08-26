@@ -41,6 +41,5 @@ Spatial correlation between pixels is detected up to a distance of four pixels w
 **Figure 4:** Flat-field correlation map at `60kel` along the parallel and serial direction. The correlation decreases as pixels get further apart. An anisotropy between the coefficients `$R_{01}$` and `$R_{10}$` is observed. The anisotropy tends to vanish for separation larger than `1 pixel`.
 
 ### Restoring Linearity
-
 ![alt text](./__resources__/PTC_recovered.jpg?raw=true "Title")
 **Figure 5:** Raw PTCs plotted in arbitrary digital unit (ADU) from zero illumination upto `90%` of the full well. Channel 7 has a different response behaviour compared to other channels.
