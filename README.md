@@ -1,4 +1,8 @@
 # OPMD
+<p>
+    <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/python-v3-brightgreen.svg" alt="python"></a> &nbsp;
+</p>
 
 Charge-coupled devices (CCDs) are regular lattices of charge receivers widely used in astronomical imaging. CCDs are generally considered to convert incoming photons into a digital number in each pixel in a linear fashion independent of the condition of surrounding pixels. However, it has been known for some time that the photon transfer curves (PTCs) of flat-field images taken by thick CCDs display abnormal deviations from the expected Poisson photon noise and that the point spread functions (PSFs) of star illuminations tend to broaden with increasing luminosity. This effect is commonly known as the "Brighter-Fatter Effect" (BFE).
 
