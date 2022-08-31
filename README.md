@@ -22,7 +22,7 @@ This investigation is carried out at the Oxford Physics Microstructure Detector 
 **Figure 1:** Measured power of the LED source and the environment in 500 repeated trials over a duration of `4.17 hours`. *Top Left:* Histogram of LED power output measured inside the integrating sphere; *Top Right:* Histogram of ambient light power measured in the environment; *Bottom:* Time-series of the LED and ambient power
 
 
-### Intensity Stability Test
+### Spectrometer Calibration
 Raw spectra measured by the spectrometer need to be cleaned and calibrated before actual spectral contents can be obtained. 
 - The first step is to remove the bias offset introduced by the analogue-to-digital converter in the downstream circuitry. 
 - The second step is to remove outliers caused by bad pixels on the digital sensor. 
